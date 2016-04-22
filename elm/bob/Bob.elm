@@ -2,6 +2,8 @@ module Bob where
 
 import String exposing ( endsWith, isEmpty, all, filter, trim, length )
 import Char exposing ( isUpper, isOctDigit, isHexDigit, toCode )
+import Regex
+import List
 
 hey : String -> String
 hey text =
@@ -10,44 +12,18 @@ hey text =
     "Fine. Be that way!"
   else if isShouting text then
     "Whoa, chill out!"
-  else if isQuestion text then
+  else if endsWith "?" text then
     "Sure."
   else
     "Whatever."
 
--- True when text ends with question mark
-isQuestion : String -> Bool
-isQuestion text =
-  if endsWith "?" text then
-    True
-  else
-    False
-
 isShouting : String -> Bool
-isShouting text =
+isShouting input =
   let
-    text' = clearText text
+    input' = Regex.find Regex.All (Regex.regex "[A-Za-z]+") input
+      |> List.map .match |> String.concat
   in
-    -- isUpper evaluates an empty string to 'true' so we check if it's empty first
-    if not (isEmpty text') && all isUpper text' then
+    if not (isEmpty input') && all isUpper input' then
       True
     else
       False
-
--- Clears a string from numbers and special characters (e.g. '%', '+', '!')
-clearText : String -> String
-clearText text =
-  filter isCharacter text
-
--- True if character is between a-z or A-Z
--- TODO: Works only with ASCII?
-isCharacter : Char -> Bool
-isCharacter char =
-  isBetween 'a' 'z' char || isBetween 'A' 'Z' char
-
--- Stolen from https://github.com/elm-lang/core/blob/master/src/Char.elm
-isBetween : Char -> Char -> Char -> Bool
-isBetween low high char =
-  let code = toCode char
-  in
-      (code >= toCode low) && (code <= toCode high)
